@@ -5,7 +5,9 @@ using ..Geometry
 
 function run()
     fig = Figure()
-    ax = Axis(fig[2, 1], title="Interactive area")
+    fig[1, 1] = controlsgrid = GridLayout(tellwidth=false)
+    fig[2, 1] = textgrid = GridLayout(tellwidth=false)
+    ax = Axis(fig[3, 1], title="Interactive area")
     deregister_interaction!(ax, :rectanglezoom)
 
 
@@ -20,8 +22,20 @@ function run()
         end
     end
 
-    linecolor = @lift(ismonotone($points) ? :green : :red)
+    ismonotonevar = @lift ismonotone($points)
+    
+    monotonetext = @lift begin
+        if length($points) < 3
+            "Nie ma wielokąta to nie ma monotoniczności"
+        else
+            "Wielokąt $($ismonotonevar ? "jest" : "nie jest") y-monotoniczny" 
+        end
+    end
+    Label(textgrid[1, 1], monotonetext)
+
+    linecolor = @lift($ismonotonevar ? :green : :red)
     lines!(ax, closedloop, color=linecolor)
+
     scatter!(ax, points)
 
 
@@ -57,8 +71,6 @@ function run()
         end
     end
 
-
-    fig[1, 1] = controlsgrid = GridLayout(tellwidth=false)
     
     resetbtn = controlsgrid[1, 1] = Button(fig, label="Reset (R)")
     on(resetbtn.clicks) do n

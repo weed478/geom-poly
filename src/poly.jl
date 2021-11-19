@@ -5,6 +5,7 @@ using GLMakie
 function main()
     fig = Figure()
     ax = Axis(fig[1, 1], title="Interactive area")
+    deregister_interaction!(ax, :rectanglezoom)
 
     points = Node(Point2f[])
     scatter!(ax, points)
@@ -22,7 +23,7 @@ function main()
     lines!(ax, poly)
 
     mouseevents = addmouseevents!(ax.scene)
-    onmouseleftclick(mouseevents) do event
+    onmouseleftdown(mouseevents) do event
         dpos = event.data
         points[] = push!(points[], dpos)
     end

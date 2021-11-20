@@ -1,12 +1,13 @@
 module Geometry
 
-export orient3x3,
-       orient2x2,
+export mkorient,
+       mkverttypes,
        ismonotone
 
 using GeometryBasics
 
 include("orient.jl")
+include("verttypes.jl")
 include("monotone.jl")
 
 end # module

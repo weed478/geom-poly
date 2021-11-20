@@ -1,7 +1,11 @@
 module GUI
 
 using GLMakie
-using ..Geometry
+import ..Geometry
+import LinearAlgebra
+
+const orient = Geometry.mkorient(Geometry.Orient3x3, LinearAlgebra.det, 1f-10)
+const verttypes = Geometry.mkverttypes(orient)
 
 function run()
     fig = Figure()
@@ -22,21 +26,37 @@ function run()
         end
     end
 
-    ismonotonevar = @lift ismonotone($points)
+    ismonotone = @lift Geometry.ismonotone($points)
     
     monotonetext = @lift begin
         if length($points) < 3
             "Nie ma wielokąta to nie ma monotoniczności"
         else
-            "Wielokąt $($ismonotonevar ? "jest" : "nie jest") y-monotoniczny" 
+            "Wielokąt $($ismonotone ? "jest" : "nie jest") y-monotoniczny" 
         end
     end
     Label(textgrid[1, 1], monotonetext)
 
-    linecolor = @lift($ismonotonevar ? :green : :red)
+    linecolor = @lift($ismonotone ? :green : :red)
     lines!(ax, closedloop, color=linecolor)
 
-    scatter!(ax, points)
+    markers = @lift begin
+        map(verttypes($points)) do t
+            if t == Geometry.StartVertex
+                :utriangle
+            elseif t == Geometry.EndVertex
+                :rect
+            elseif t == Geometry.MergeVertex
+                :star5
+            elseif t == Geometry.SplitVertex
+                :xcross
+            else
+                :circle
+            end
+        end
+    end
+
+    scatter!(ax, points, marker=markers)
 
 
     function pushpoint!(p)

@@ -56,7 +56,50 @@ function run()
         end
     end
 
-    scatter!(ax, points, marker=markers)
+    scatter!(
+        ax,
+        points,
+        marker=markers,
+        markersize=15,
+        color=:black,
+    )
+
+    Legend(fig[3, 2],
+        [
+            MarkerElement(
+                marker=:utriangle,
+                markersize=15,
+                color=:black,
+            ),
+            MarkerElement(
+                marker=:rect,
+                markersize=15,
+                color=:black,
+            ),
+            MarkerElement(
+                marker=:star5,
+                markersize=15,
+                color=:black,
+            ),
+            MarkerElement(
+                marker=:xcross,
+                markersize=15,
+                color=:black,
+            ),
+            MarkerElement(
+                marker=:circle,
+                markersize=15,
+                color=:black,
+            ),
+        ],
+        [
+            "Początkowe",
+            "Końcowe",
+            "Łączące",
+            "Dzielące",
+            "Prawidłowe",
+        ],
+    )
 
 
     function pushpoint!(p)

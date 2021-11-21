@@ -6,6 +6,7 @@ import LinearAlgebra
 
 const orient = Geometry.mkorient(Geometry.Orient3x3, LinearAlgebra.det, 1f-10)
 const verttypes = Geometry.mkverttypes(orient)
+const triangulate = Geometry.mktriangulate(orient)
 
 function run()
     fig = Figure()
@@ -100,6 +101,26 @@ function run()
             "Prawidłowe",
         ],
     )
+
+
+    triang = @lift begin
+        segments = Point2f[]
+        
+        if !$ismonotone
+            return segments
+        end
+
+        lines = triangulate($points)
+
+        for l in lines
+            push!(segments, l[1])
+            push!(segments, l[2])
+        end
+        
+        segments
+    end
+
+    linesegments!(ax, triang)
 
 
     function pushpoint!(p)

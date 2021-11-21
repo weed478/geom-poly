@@ -1,5 +1,5 @@
 function mktriangulate(orient)
-    function triangulate(poly::Vector{Point2{T}})::Vector{Line{2,T}} where T
+    function triangulate(poly::Vector{Point2{T}}, triangles=missing)::Vector{Line{2,T}} where T
         n = length(poly)
 
         if n < 4
@@ -15,6 +15,12 @@ function mktriangulate(orient)
         
         # get vertex by sorted index
         v(i) = poly[sorted[i]]
+
+        function pushtriangle!(i, j, k)
+            if !ismissing(triangles)
+                push!(triangles, Triangle{2,T}(v(i), v(j), v(k)))
+            end
+        end
 
         function getchain(i)
             ps = pmod.(sorted[i]-1:sorted[i]+1)
@@ -59,14 +65,20 @@ function mktriangulate(orient)
         
         for i = 3:n
             if !samechain(i, stack[end])
+                k = missing
                 for j = stack
                     pushdiag!(i, j)
+                    if !ismissing(k)
+                        pushtriangle!(i, j, k)
+                    end
+                    k = j
                 end
                 stack = [stack[end], i]
             else
                 j = pop!(stack)
                 while length(stack) > 0 && goodtriangle(i, j, stack[end])
                     pushdiag!(i, stack[end])
+                    pushtriangle!(i, j, stack[end])
                     j = pop!(stack)
                 end
                 push!(stack, j)

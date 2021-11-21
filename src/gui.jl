@@ -1,6 +1,7 @@
 module GUI
 
 using GLMakie
+using GeometryBasics
 import ..Geometry
 import LinearAlgebra
 
@@ -103,14 +104,20 @@ function run()
     )
 
 
+    triangles = Node{Vector{Triangle{2,Float32}}}([])
+    visibletriangles = Node{Vector{Triangle{2,Float32}}}([])
+
     triang = @lift begin
+        triangles[] = []
+
         segments = Point2f[]
         
         if !$ismonotone
             return segments
         end
 
-        lines = triangulate($points)
+        lines = triangulate($points, triangles[])
+        triangles[] = triangles[]
 
         for l in lines
             push!(segments, l[1])
@@ -121,6 +128,37 @@ function run()
     end
 
     linesegments!(ax, triang)
+    
+    animstep = Node(0)
+
+    function stepanimation!()
+        animstep[] = animstep[] + 1
+    end
+
+    on(animstep) do animstep
+        visibletriangles[] = collect(Iterators.take(triangles[], animstep))
+    end
+
+    on(points) do p
+        animstep[] = 0
+    end
+
+    emptypoly = [Point2f(0, 0), Point2f(0, 0), Point2f(0, 0)]
+    polys = Node{Vector{Vector{Point2f}}}([emptypoly])
+
+    on(visibletriangles) do triangles
+        polys.val = []
+        if length(triangles) == 0
+            push!(polys.val, emptypoly)
+        else
+            for t in triangles
+                push!(polys.val, [t[1], t[2], t[3]])
+            end
+        end
+        polys[] = polys[]
+    end
+
+    poly!(ax, polys)
 
 
     function pushpoint!(p)
@@ -151,6 +189,8 @@ function run()
                 autolimits!(ax)
             elseif event.key == Keyboard.p
                 poppoint!()
+            elseif event.key == Keyboard.s
+                stepanimation!()
             end
         end
     end
@@ -169,6 +209,11 @@ function run()
     popbtn = controlsgrid[1, 3] = Button(fig, label="Remove last (P)")
     on(popbtn.clicks) do n
         poppoint!()
+    end
+
+    animbtn = controlsgrid[1, 4] = Button(fig, label="Step animation (S)")
+    on(animbtn.clicks) do n
+        stepanimation!()
     end
 
 

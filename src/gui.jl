@@ -58,12 +58,29 @@ function run()
         end
     end
 
+    markercolors = @lift begin
+        map(verttypes($points)) do t
+            if t == Geometry.StartVertex
+                :green
+            elseif t == Geometry.EndVertex
+                :red
+            elseif t == Geometry.MergeVertex
+                :purple
+            elseif t == Geometry.SplitVertex
+                :lightblue
+            else
+                :brown
+            end
+        end
+    end
+
     scatter!(
         ax,
         points,
         marker=markers,
+        color=markercolors,
         markersize=15,
-        color=:black,
+        # color=:black,
     )
 
     Legend(fig[3, 2],
@@ -71,27 +88,27 @@ function run()
             MarkerElement(
                 marker=:utriangle,
                 markersize=15,
-                color=:black,
+                color=:green,
             ),
             MarkerElement(
                 marker=:rect,
                 markersize=15,
-                color=:black,
+                color=:red,
             ),
             MarkerElement(
                 marker=:star5,
                 markersize=15,
-                color=:black,
+                color=:purple,
             ),
             MarkerElement(
                 marker=:xcross,
                 markersize=15,
-                color=:black,
+                color=:lightblue,
             ),
             MarkerElement(
                 marker=:circle,
                 markersize=15,
-                color=:black,
+                color=:brown,
             ),
         ],
         [
@@ -126,6 +143,11 @@ function run()
         
         segments
     end
+
+    numdiagstext = @lift begin        
+        "Dodano $(div(length($triang), 2)) przekątnych"
+    end
+    Label(textgrid[2, 1], numdiagstext)
 
     linesegments!(ax, triang)
     

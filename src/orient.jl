@@ -1,5 +1,8 @@
 @enum OrientType Orient2x2 Orient3x3
 
+# funkcja orient zwraca -1, 0, 1
+# porównywanie z epsilon odbywa się w funkcji
+
 function mkorient(type::OrientType, det, e::T) where T
     if type == Orient2x2
         function orient2x2(a::Point2{T}, b::Point2{T}, c::Point2{T})::Int

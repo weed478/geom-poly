@@ -30,7 +30,7 @@ function mktriangulate(orient)
             elseif y0 < y1 < y2
                 1
             else
-                @assert y1 == v(1)[2] || y1 == v(n)[2]
+                # on both chains
                 0
             end
         end
@@ -42,8 +42,6 @@ function mktriangulate(orient)
         end
 
         function goodtriangle(i, j, k)
-            # weird
-            # @assert (v(i)[2] > v(j)[2] > v(k)[2]) || (v(i)[2] < v(j)[2] < v(k)[2])
             if getchain(j) == -1
                 orient(v.([i, j, k])...) > 0
             elseif getchain(j) == 1
@@ -65,6 +63,7 @@ function mktriangulate(orient)
         
         for i = 3:n
             if !samechain(i, stack[end])
+                # temp variable to keep track of triangles
                 k = missing
                 for j = stack
                     pushdiag!(i, j)

@@ -5,10 +5,12 @@ using GeometryBasics
 import ..Geometry
 import LinearAlgebra
 
+# konfigurowanie wyznacznika i wartości epsilon
 const orient = Geometry.mkorient(Geometry.Orient3x3, LinearAlgebra.det, 1f-10)
 const verttypes = Geometry.mkverttypes(orient)
 const triangulate = Geometry.mktriangulate(orient)
 
+# zero logiki, jedynie rysowanie
 function run()
     fig = Figure()
     fig[1, 1] = controlsgrid = GridLayout(tellwidth=false)
@@ -28,6 +30,7 @@ function run()
         end
     end
 
+    # sprawdzanie monotoniczności
     ismonotone = @lift Geometry.ismonotone($points)
     
     monotonetext = @lift begin
@@ -39,9 +42,11 @@ function run()
     end
     Label(textgrid[1, 1], monotonetext)
 
+    # rysowanie wielokąta
     linecolor = @lift($ismonotone ? :green : :red)
     lines!(ax, closedloop, color=linecolor)
 
+    # podział wierzchołków
     markers = @lift begin
         map(verttypes($points)) do t
             if t == Geometry.StartVertex
@@ -74,6 +79,7 @@ function run()
         end
     end
 
+    # rysowanie rodzajów wierzchołków
     scatter!(
         ax,
         points,
@@ -121,9 +127,11 @@ function run()
     )
 
 
+    # trójkąty i stan animacji
     triangles = Node{Vector{Triangle{2,Float32}}}([])
     visibletriangles = Node{Vector{Triangle{2,Float32}}}([])
 
+    # triangulacja jako lista punktów (kolejno parami są przekątne)
     triang = @lift begin
         triangles[] = []
 
@@ -144,6 +152,7 @@ function run()
         segments
     end
 
+    # dzielone przez 2, ponieważ w triang dla każdej przekątnej są 2 punkty
     numdiagstext = @lift begin        
         "Przekątne: $(div(length($triang), 2))"
     end
@@ -156,6 +165,9 @@ function run()
 
     linesegments!(ax, triang)
     
+
+    # animacja
+
     animstep = Node(0)
 
     function stepanimation!()
@@ -187,6 +199,8 @@ function run()
 
     poly!(ax, polys)
 
+
+    # guziki itd
 
     function pushpoint!(p)
         points[] = push!(points[], p)

@@ -145,9 +145,14 @@ function run()
     end
 
     numdiagstext = @lift begin        
-        "Dodano $(div(length($triang), 2)) przekątnych"
+        "Przekątne: $(div(length($triang), 2))"
     end
     Label(textgrid[2, 1], numdiagstext)
+
+    numtriangstext = @lift begin        
+        "Trójkąty: $(length($triangles))"
+    end
+    Label(textgrid[3, 1], numtriangstext)
 
     linesegments!(ax, triang)
     
